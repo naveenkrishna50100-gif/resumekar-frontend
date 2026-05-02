@@ -47,9 +47,50 @@ export default function Pricing() {
   const monthlyPrice = getDiscountedPrice(299);
   const annualPrice = getDiscountedPrice(999);
 
-  const handleUpgrade = (plan) => {
+  const handleUpgrade = async (plan) => {
     if (!user) { navigate('/signup'); return; }
-    alert(`Payment coming soon! Email us at hello@resumekar.in to get ${plan} access early.${appliedCoupon ? ` Mention coupon: ${appliedCoupon.code}` : ''}`);
+
+    if (!razorpayLoaded) {
+      alert('Payment system loading. Please try again.');
+      return;
+    }
+
+    try {
+      setLoading(plan);
+      const res = await createSubscription(plan);
+      const { subscriptionId, razorpayKeyId, userEmail, userName } = res.data;
+
+      const options = {
+        key: razorpayKeyId,
+        subscription_id: subscriptionId,
+        name: 'ResumeKar',
+        description: plan === 'annual' ? 'Pro Annual — ₹999/year' : 'Pro Monthly — ₹299/month',
+        handler: async (response) => {
+          try {
+            const verifyRes = await verifyPayment({ ...response, plan });
+            await loadProfile();
+            alert('🎉 ' + verifyRes.data.message);
+            navigate('/dashboard');
+          } catch (err) {
+            alert('Payment successful but verification failed. Please contact naveenkrishna50100@gmail.com');
+          }
+        },
+        prefill: { email: userEmail, name: userName },
+        theme: { color: '#1D9E75' },
+        modal: { ondismiss: () => setLoading(null) }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (response) => {
+        alert('Payment failed: ' + response.error.description);
+        setLoading(null);
+      });
+      rzp.open();
+
+    } catch (err) {
+      alert(err.response?.data?.error || 'Payment failed. Please try again.');
+      setLoading(null);
+    }
   };
 
   return (
