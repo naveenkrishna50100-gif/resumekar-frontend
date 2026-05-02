@@ -27,4 +27,9 @@ export const evaluateJob = (jobDescription, jobUrl) =>
 export const getHistory = () => api.get('/api/evaluate/history');
 export const getPaymentStatus = () => api.get('/api/payments/status');
 
+export const createSubscription = (plan) =>
+  api.post('/api/payments/create-subscription', { plan });
+
+export const verifyPayment = (data) =>
+  api.post('/api/payments/verify', data);
 export default api;
