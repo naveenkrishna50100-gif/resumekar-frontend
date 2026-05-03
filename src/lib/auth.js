@@ -12,8 +12,16 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('rk_token');
     const savedUser = localStorage.getItem('rk_user');
     if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-      loadProfile();
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        loadProfile();
+      } catch (e) {
+        // Corrupted storage — clear it
+        localStorage.removeItem('rk_token');
+        localStorage.removeItem('rk_user');
+        setLoading(false);
+      }
     } else {
       setLoading(false);
     }
@@ -24,7 +32,11 @@ export function AuthProvider({ children }) {
       const res = await getProfile();
       setProfile(res.data.profile);
     } catch (e) {
-      logout();
+      // Token expired or invalid — logout
+      localStorage.removeItem('rk_token');
+      localStorage.removeItem('rk_user');
+      setUser(null);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
