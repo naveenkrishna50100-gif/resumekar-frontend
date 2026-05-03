@@ -17,7 +17,6 @@ export function AuthProvider({ children }) {
         setUser(parsedUser);
         loadProfile();
       } catch (e) {
-        // Corrupted storage — clear it
         localStorage.removeItem('rk_token');
         localStorage.removeItem('rk_user');
         setLoading(false);
@@ -32,7 +31,6 @@ export function AuthProvider({ children }) {
       const res = await getProfile();
       setProfile(res.data.profile);
     } catch (e) {
-      // Token expired or invalid — logout
       localStorage.removeItem('rk_token');
       localStorage.removeItem('rk_user');
       setUser(null);
