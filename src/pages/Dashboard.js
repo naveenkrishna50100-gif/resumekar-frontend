@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Dashboard — ResumeKar';
     Promise.all([getHistory(), getPaymentStatus()])
       .then(([histRes, usageRes]) => {
         setHistory(histRes.data.evaluations || []);
