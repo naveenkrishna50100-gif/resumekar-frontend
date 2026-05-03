@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -19,13 +19,17 @@ export default function Login() {
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = 'Login — ResumeKar';
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
       const res = await login(email, password);
       loginUser(res.data.token, res.data.user);
-      navigate('/dashboard');
+      window.location.href = '/dashboard';
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {
@@ -56,7 +60,7 @@ export default function Login() {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `https://resumekar.in/reset-password`
       });
       if (error) throw error;
       setForgotSent(true);
@@ -67,7 +71,6 @@ export default function Login() {
     }
   };
 
-  // Forgot password mode
   if (forgotMode) {
     return (
       <div style={{ minHeight: '100vh', background: '#f8f7f4', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
@@ -95,7 +98,7 @@ export default function Login() {
                 <button className="btn btn-primary btn-full" type="submit" disabled={forgotLoading}>
                   {forgotLoading ? <><span className="spinner"></span> Sending...</> : 'Send reset link →'}
                 </button>
-                <button type="button" onClick={() => setForgotMode(false)} style={{ width: '100%', marginTop: 10, background: 'none', border: 'none', color: '#666', fontSize: 13, cursor: 'pointer', padding: '8px' }}>
+                <button type="button" onClick={() => setForgotMode(false)} style={{ width: '100%', marginTop: 10, background: 'none', border: 'none', color: '#666', fontSize: 13, cursor: 'pointer', padding: '8px', fontFamily: "'DM Sans', sans-serif" }}>
                   ← Back to login
                 </button>
               </form>
@@ -118,15 +121,8 @@ export default function Login() {
         <div className="card">
           {error && <div className="alert alert-error">{error}</div>}
 
-          {/* Google Login */}
-          <button
-            onClick={handleGoogleLogin}
-            disabled={googleLoading}
-            style={{ width: '100%', padding: '10px', border: '1px solid #e8e6e0', borderRadius: 8, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 14, fontWeight: 500, marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}
-          >
-            {googleLoading ? (
-              <span className="spinner"></span>
-            ) : (
+          <button onClick={handleGoogleLogin} disabled={googleLoading} style={{ width: '100%', padding: '10px', border: '1px solid #e8e6e0', borderRadius: 8, background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 14, fontWeight: 500, marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>
+            {googleLoading ? <span className="spinner"></span> : (
               <svg width="18" height="18" viewBox="0 0 48 48">
                 <path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/>
                 <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.1 6.5 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
