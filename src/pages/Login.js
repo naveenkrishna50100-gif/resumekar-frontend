@@ -23,19 +23,24 @@ export default function Login() {
     document.title = 'Login — ResumeKar';
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(''); setLoading(true);
-    try {
-      const res = await login(email, password);
-      loginUser(res.data.token, res.data.user);
-      window.location.href = '/dashboard';
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(''); setLoading(true);
+  try {
+    const res = await login(email, password);
+    loginUser(res.data.token, res.data.user);
+    window.location.href = '/dashboard';
+  } catch (err) {
+    const errorMsg = err.response?.data?.error 
+      || err.message 
+      || 'Unknown error';
+    const statusCode = err.response?.status || 'No status';
+    const apiUrl = process.env.REACT_APP_API_URL || 'No API URL set';
+    setError(`Error: ${errorMsg} | Status: ${statusCode} | API: ${apiUrl}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
