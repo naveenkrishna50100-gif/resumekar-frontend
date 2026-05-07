@@ -36,7 +36,11 @@ function PublicRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+      <Route path="/" element={
+  window.location.hash.includes('access_token')
+    ? <AuthCallback />
+    : <PublicRoute><Landing /></PublicRoute>
+} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/auth/callback" element={<AuthCallback />} />
