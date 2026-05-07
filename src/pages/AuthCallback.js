@@ -14,25 +14,62 @@ export default function AuthCallback() {
       try {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data: { session }, error } = await supabase.auth.getSession();
 
-        if (error || !session) {
-          navigate('/login');
-          return;
-        }
+        // Handle hash fragment from Supabase OAuth
+        const hashParams = new URLSearchParams(
+          window.location.hash.substring(1)
+        );
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
 
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google-callback`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ access_token: session.access_token })
-        });
+        if (accessToken) {
+          // Set session from hash params
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
 
-        const data = await response.json();
-        if (data.success) {
-          loginUser(data.token, data.user);
-          navigate('/dashboard');
+          if (error || !data.session) {
+            navigate('/login');
+            return;
+          }
+
+          const apiUrl = process.env.REACT_APP_API_URL || 'https://api.resumekar.in';
+          const response = await fetch(`${apiUrl}/api/auth/google-callback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ access_token: data.session.access_token })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            loginUser(result.token, result.user);
+            window.location.href = '/dashboard';
+          } else {
+            navigate('/login');
+          }
         } else {
-          navigate('/login');
+          // Try getting existing session
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error || !session) {
+            navigate('/login');
+            return;
+          }
+
+          const apiUrl = process.env.REACT_APP_API_URL || 'https://api.resumekar.in';
+          const response = await fetch(`${apiUrl}/api/auth/google-callback`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ access_token: session.access_token })
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            loginUser(result.token, result.user);
+            window.location.href = '/dashboard';
+          } else {
+            navigate('/login');
+          }
         }
       } catch (err) {
         console.error('Auth callback error:', err);
@@ -47,7 +84,7 @@ export default function AuthCallback() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f8f7f4' }}>
       <div style={{ textAlign: 'center' }}>
         <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 16px' }}></div>
-        <div style={{ fontWeight: 500, fontSize: 16 }}>Signing you in...</div>
+        <div style={{ fontWeight: 500, fontSize: 16 }}>Signing you in with Google...</div>
         <div style={{ color: '#666', fontSize: 13, marginTop: 6 }}>Please wait</div>
       </div>
     </div>
