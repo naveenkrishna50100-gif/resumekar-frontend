@@ -36,6 +36,16 @@ export default function Navbar() {
 
   return (
     <>
+    <div style={{
+  background: '#1D9E75',
+  color: '#fff',
+  textAlign: 'center',
+  padding: '8px 1rem',
+  fontSize: 12,
+  display: window.innerWidth < 768 ? 'block' : 'none'
+}}>
+  💡 For the best experience open ResumeKar on desktop
+</div>
       <nav style={{
         background: '#fff', borderBottom: '1px solid #e8e6e0',
         padding: '0 2rem', display: 'flex', alignItems: 'center',
