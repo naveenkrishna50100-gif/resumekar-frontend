@@ -160,14 +160,7 @@ export default function Pricing() {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '2rem', color: '#999', fontSize: 13 }}>
-          Questions? Email us at{' '}
-          <a href="#" onClick={e => { e.preventDefault(); handleCollegeContact(); }} style={{ color: '#1D9E75' }}>
-            naveenkrishna50100@gmail.com
-          </a>
-          <br />
-          <span style={{ fontSize: 11, marginTop: 6, display: 'block' }}>
             Secure payments via Razorpay · Cancel anytime · ATS-optimised resumes
-          </span>
         </div>
       </div>
     </div>
